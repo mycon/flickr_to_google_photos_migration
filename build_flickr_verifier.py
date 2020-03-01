@@ -10,4 +10,4 @@ print(f"url: {url}")
 verifier = input("Verifier code: ")
 
 a.set_verifier(verifier)
-a.save("flickr_credentials.dat")
+a.save("auth/flickr_credentials.dat")

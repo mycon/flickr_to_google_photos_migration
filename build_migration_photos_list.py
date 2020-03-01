@@ -9,7 +9,7 @@ r = redis.Redis(host='0.0.0.0', port=6379, db=0, decode_responses=True)
 flickr_api.set_keys(api_key=os.environ['FLICKR_API_KEY'], api_secret=os.environ['FLICKR_API_SECRET'])
 
 photoset_counter = 0
-flickr_api.set_auth_handler((Path.cwd() / "auth" / "flickr_auth_handler").resolve().as_posix())
+flickr_api.set_auth_handler((Path.cwd() / "auth" / "flickr_credentials.dat").resolve().as_posix())
 user = flickr_api.test.login()
 
 photo_set_walker = flickr_api.Walker(user.getPhotosets)
