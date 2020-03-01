@@ -5,7 +5,7 @@ FLICKR_CREDENTIALS_DATA=$(CREDENTIALS_DIRECTORY)/flickr_credentials.dat
 build: $(DIRECTORIES) ## Set up the app ready to run
 	docker-compose build
 
-start: $(FLICKR_CREDENTIALS_DATA) ## Run the migration
+build_migration_list: $(FLICKR_CREDENTIALS_DATA) ## Build the photos migration list
 	docker-compose start redis
 	docker-compose run app python build_migration_photos_list.py
 
