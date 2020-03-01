@@ -8,3 +8,4 @@ venv/
 flickr.sh
 photosets-complete/
 photosets-queue/
+docker-compose.override.yml

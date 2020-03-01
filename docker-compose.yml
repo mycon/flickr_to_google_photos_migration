@@ -1,0 +1,15 @@
+app:
+  build: .
+  volumes:
+    - .:/app
+  ports:
+    - "3021:3021"
+  links:
+    - redis
+
+redis:
+  image: redis:alpine
+  ports:
+    - "6379:6379"
+  restart: always
+
