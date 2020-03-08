@@ -2,7 +2,7 @@ import redis
 from migration_util import authorize_with_google, get_google_photos_service
 
 
-r = redis.Redis(host='0.0.0.0', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 
 
 def build_album_cache(service):

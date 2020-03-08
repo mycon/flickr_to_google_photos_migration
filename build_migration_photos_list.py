@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import redis
 
-r = redis.Redis(host='0.0.0.0', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 flickr_api.set_keys(api_key=os.environ['FLICKR_API_KEY'], api_secret=os.environ['FLICKR_API_SECRET'])
 
 photoset_counter = 0

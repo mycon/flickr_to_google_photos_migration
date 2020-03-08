@@ -8,7 +8,7 @@ from io import BytesIO
 from pathlib import Path
 import redis
 
-r = redis.Redis(host='0.0.0.0', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 
 
 def authorize_with_google():

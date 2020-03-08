@@ -21,7 +21,7 @@ app.conf.update({
     'result_serializer': 'json',
     'accept_content': ['json']})
 
-r = redis.Redis(host='0.0.0.0', port=6379, db=0, decode_responses=True)
+r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 
 
 @app.task(autoretry_for=(RequestException, HttpError),
