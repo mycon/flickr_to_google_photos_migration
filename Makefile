@@ -15,5 +15,5 @@ build_migration_list: $(FLICKR_CREDENTIALS_DATA) ## Build the photos migration l
 $(DIRECTORIES): ## Create the directories required to run the app
 	mkdir -p $@
 
-$(FLICKR_CREDENTIALS_DATA): $(CREDENTIALS_DIRECTORY) ## Set up authorisation to read flickr account
+$(FLICKR_CREDENTIALS_DATA): | $(CREDENTIALS_DIRECTORY) ## Set up authorisation to read flickr account
 	docker-compose run app python build_flickr_verifier.py
