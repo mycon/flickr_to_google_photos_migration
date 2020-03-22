@@ -17,6 +17,12 @@ build_migration_list: $(FLICKR_CREDENTIALS_DATA) ## Build the photos migration l
 create_album_cache: $(GOOGLE_TOKEN_DATA) ## Build google photos album cache
 	docker-compose run app python create_album_cache.py
 
+create_migration_tasks: ## Create migration tasks for each photo in the photosets in each pickle file photosets-queue
+	docker-compose run app python create_migration_tasks.py
+
+run_migration_tasks: ## Run the migration tasks that have been created
+	docker-compose run app celery -A celery_migration_app worker --loglevel=debug --concurrency=1 -E
+
 $(DIRECTORIES): ## Create the directories required to run the app
 	mkdir -p $@
 
