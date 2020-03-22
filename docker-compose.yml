@@ -4,6 +4,7 @@ app:
     - .:/app
   ports:
     - "3021:3021"
+    - "8080:8080"
   links:
     - redis
 
