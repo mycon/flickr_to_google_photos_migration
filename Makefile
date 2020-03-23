@@ -10,6 +10,12 @@ help: ## Show this help
 build: $(DIRECTORIES) ## Set up the app ready to run
 	docker-compose build
 
+start: ## Start the containers
+	docker-compose start
+
+stop: ## Stop the containers
+	docker-compose stop
+
 build_migration_list: $(FLICKR_CREDENTIALS_DATA) ## Build the photos migration list
 	docker-compose start redis
 	docker-compose run app python build_migration_photos_list.py
