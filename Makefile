@@ -38,3 +38,6 @@ You need to set up your access to the Google Photos API. Google's https://develo
 for the API has a number of useful guides that will help you get set up. You need to set up a project and user with  \
 oauth2 access to your Google Photos library, so that in the end you end up with a ```google_credentials.json``` file" \
 )
+
+clean-redis:
+  docker-compose run app redis-cli -h redis FLUSHALL
