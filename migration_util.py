@@ -19,7 +19,7 @@ def authorize_with_google():
 def get_google_photos_service(google_creds):
     return build('photoslibrary', 'v1',
                  http=google_creds.authorize(Http()),
-                 cache_discovery=False)
+                 cache_discovery=False,static_discovery=False)
 
 
 def find_album_on_google(album_title):
@@ -65,6 +65,59 @@ def upload_photo_to_google(google_auth, service, album_id, photo_data,
 
         return add_photo_resp
 
+def upload_photo_grp_to_google(google_auth, service, album_id, photo_list):
+    media_items = service.mediaItems()
+  
+    url = 'https://photoslibrary.googleapis.com/v1/uploads'
+    uploaded_photos = {}
+    
+    if len(photo_list) > 50:
+      raise ValueError("Too many items in list.  Limit to max of 50")
+    
+    for photo in photo_list:
+      with open(photo['path'], "rb") as photo_data:
+        authorization = 'Bearer ' + google_auth.access_token
+        headers = {
+            "Authorization": authorization,
+            'Content-type': 'application/octet-stream',
+            'X-Goog-Upload-File-Name': photo['file_name'],
+            'X-Goog-Upload-Protocol': 'raw',
+        }
+      
+        upload_response = requests.post(url, headers=headers, data=photo_data)
+        upload_token = upload_response.text
+        
+        if upload_token is not None:
+          uploaded_photos[upload_token] = photo
+
+    mediaItems = []
+    for token, photo in uploaded_photos.items():
+      mItem = {
+                "description": photo['description'][:999], #Need to limit to < 1000
+                "simpleMediaItem": {
+                    "uploadToken": token
+                    # Optional  "fileName" : '
+                }
+            }
+      mediaItems.append(mItem)
+      
+    payload = {
+        "albumId": album_id,
+        "newMediaItems": mediaItems
+    }
+
+    add_photo_req = media_items.batchCreate(body=payload)
+    add_photo_resp = add_photo_req.execute()
+
+    #Process success and flag in DB
+    success_list = []
+    for ul_item in add_photo_resp['newMediaItemResults']:
+      if ul_item['mediaItem'] is not None:
+        photo = uploaded_photos[ul_item['uploadToken']]
+        photo['g_id'] = ul_item['mediaItem']['id']
+        success_list.append(photo)
+
+    return add_photo_resp, success_list
 
 def get_photo_from_flickr(photo_url):
     photo_url_obj = urllib.request.urlopen(photo_url)

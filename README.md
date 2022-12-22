@@ -99,9 +99,37 @@ Fire up your own redis instance using docker:
 docker run --name my-redis -p 6379:6379 --restart always --detach redis
 ```
 
+For windows with docker on WSL the ip isn't localhost.
+Update `c:\Windows\System32\drivers\etc\hosts with`
+```
+127.0.0.1 redis
+```
+
+Then run docker command
+```
+docker run --name my-redis -dit -p 127.0.0.1:6379:6379 --restart always --detach redis
+```
+
 For each album, a file named `photosets-queue/photoset-${album-id}-${# of photos}.pickle` will be created and an entry
 will be added to Redis to record that the album has been retrieved.  If the script should fail, simply restart it.
 It will skip all of the albums that have previously been downloaded.
+
+### Alternate Local Directory Backup of Flickr
+Instead of building the database from Flickr online (which I encountered many, many http errors/timeouts), 
+I downloaded the file to a structure with [flickrbackup](https://github.com/mycon/flickrbackup)
+```
+ Photos\
+    Album0\
+       image.jpg
+       image.jpg.txt (metadata)
+    Album1\
+```
+
+You can use `local_to_gphoto.py` to parse your local directory tree then upload in batches to google photos.
+After the initial run if things crash out there's a pickel file with the parsed tee saved, so you can skip the local re-parsing with -p
+```bash
+python local_to_gphoto.py -r C:\FlickrPhotos
+```
 
 ### Creating album cache
 To speed up the process of identifying albums in Google, a local cache of Google album titles will created.
