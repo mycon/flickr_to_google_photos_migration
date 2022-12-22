@@ -1,16 +1,20 @@
-app:
-  build: .
-  volumes:
-    - .:/app
-  ports:
-    - "3021:3021"
-    - "8080:8080"
-  links:
-    - redis
+version: "3.9"
 
-redis:
-  image: redis:alpine
-  ports:
-    - "6379:6379"
-  restart: always
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "3021:3021"
+      - "8080:8080"
+    links:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
 
