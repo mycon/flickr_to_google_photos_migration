@@ -23,27 +23,43 @@ for photo in photo_walker:
     print(f"photo: {photo_counter} - {photo.getInfo()}")
 
     if r.get(photo_key(photo)) is None:
-        try:
-            photo_url = photo.getPhotoFile("Original")
-        except flickr_api.flickrerrors.FlickrServerError as e:
-            print(f"Couldn't get original size URL {e}. Skipping")
-            continue
-        except flickr_api.flickrerrors.FlickrError as e:
-            print(f"Couldn't get original size URL {e}. Skipping")
-            continue
+        retry = 50
+        while(retry > 0):
+          try:
+              photo_url = photo.getPhotoFile("Original")
+              photo_description = photo.getInfo()['description']
+              photo_tags = photo.getTags()
+              photo_taken = photo.getInfo()['taken']
+              retry = -1
+          except flickr_api.flickrerrors.FlickrServerError as e:
+              print(f"Couldn't get original size URL {e}. Skipping")
+              retry -= 1
+              
+          except flickr_api.flickrerrors.FlickrError as e:
+              print(f"Couldn't get original size URL {e}. Skipping")
+              retry -= 1
+              
+        if retry == 0:
+          print(f"Max retries reached.  Skipping {photo_key(photo)}.")
+          continue
 
         info = {
             "id": photo['id'],
             "title": photo['title'],
             "photoUrl": photo_url,
             "processed": False,
-            "description": photo.getInfo()['description'],
-            "tags": photo.getTags(),
-            "taken": photo.getInfo()['taken']
+            "description": photo_description,
+            "tags": photo_tags,
+            "taken": photo_taken
         }
 
         print(f"info {info}")
-
-        r.set(photo_key(photo), json.dumps(info))
+        
+        try:
+          if isinstance(info['tags'], list):
+            info['tags']=''
+          r.set(photo_key(photo), json.dumps(info))
+        except:
+          import pdb; pdb.set_trace()
 
         photo_counter += 1

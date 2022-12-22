@@ -12,8 +12,13 @@ def build_album_cache(service):
         album_list_resp = album_list_req.execute()
         album_list = album_list_resp.get('albums', [])
         for album in album_list:
-            if r.get(album['title']) is None:
-                r.set(album['title'], album['id'])
+            if not 'title' in album:
+              continue
+            try:
+              if r.get(album['title']) is None:
+                  r.set(album['title'], album['id'])
+            except:
+              import pdb; pdb.set_trace()
 
         album_list_req = albums.list_next(album_list_req, album_list_resp)
 
