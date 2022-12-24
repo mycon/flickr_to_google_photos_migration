@@ -26,8 +26,8 @@ def read_meta_txt(file):
           if line[0] == '[':
             continue
           key_val = [x.strip() for x in line.split('=')]
-          if key_val[0] in meta_fields and len(key_val) == 2:
-            meta[key_val[0]] = key_val[1]
+          if key_val[0] in meta_fields and len(key_val) >= 2:
+            meta[key_val[0]] = ''.join(key_val[1::])
             id = key_val[0]
           else:
             meta[id] += line
@@ -111,7 +111,7 @@ def submit_group(google_creds, service, photo_list, start_count, total_photos):
         r.set(photo['db_key'], photo['g_id'])
         
       #Debug prints for success/failures
-      if 1:
+      if 0:
         for photo in photo_list:
           if r.get(photo['db_key']) is None:
             print(f"Failed: {photo['file_name']}")
@@ -141,6 +141,9 @@ def send_to_gphoto(file_list):
       
       with r.lock("find-photo"):
         if r.get(photo['db_key']) is None:
+          #Temp fix for meta parse error
+          if not 'description' in photo:
+            photo['description']=''
           photo_group.append(photo)
       
     if len(photo_group) > 0:

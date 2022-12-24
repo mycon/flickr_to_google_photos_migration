@@ -7,6 +7,7 @@ import urllib
 from io import BytesIO
 from pathlib import Path
 import redis
+import pdb
 
 r = redis.Redis(host='redis', port=6379, db=0, decode_responses=True)
 
@@ -76,46 +77,57 @@ def upload_photo_grp_to_google(google_auth, service, album_id, photo_list):
     
     for photo in photo_list:
       with open(photo['path'], "rb") as photo_data:
-        authorization = 'Bearer ' + google_auth.access_token
-        headers = {
-            "Authorization": authorization,
-            'Content-type': 'application/octet-stream',
-            'X-Goog-Upload-File-Name': photo['file_name'],
-            'X-Goog-Upload-Protocol': 'raw',
-        }
-      
-        upload_response = requests.post(url, headers=headers, data=photo_data)
-        upload_token = upload_response.text
+        try:
+          authorization = 'Bearer ' + google_auth.access_token
+          headers = {
+              "Authorization": authorization,
+              'Content-type': 'application/octet-stream',
+              'X-Goog-Upload-File-Name': photo['file_name'],
+              'X-Goog-Upload-Protocol': 'raw',
+          }
+
+          upload_response = requests.post(url, headers=headers, data=photo_data)
+          upload_token = upload_response.text
+        except Exception as e:
+          #pdb.set_trace()
+          raise e
         
         if upload_token is not None:
           uploaded_photos[upload_token] = photo
 
-    mediaItems = []
-    for token, photo in uploaded_photos.items():
-      mItem = {
-                "description": photo['description'][:999], #Need to limit to < 1000
-                "simpleMediaItem": {
-                    "uploadToken": token
-                    # Optional  "fileName" : '
-                }
-            }
-      mediaItems.append(mItem)
-      
-    payload = {
-        "albumId": album_id,
-        "newMediaItems": mediaItems
-    }
+    try:
+      mediaItems = []
+      for token, photo in uploaded_photos.items():
+        mItem = {
+                  "description": photo['description'][:999], #Need to limit to < 1000
+                  "simpleMediaItem": {
+                      "uploadToken": token
+                      # Optional  "fileName" : '
+                  }
+              }
+        mediaItems.append(mItem)
+        
+      payload = {
+          "albumId": album_id,
+          "newMediaItems": mediaItems
+      }
 
-    add_photo_req = media_items.batchCreate(body=payload)
-    add_photo_resp = add_photo_req.execute()
+      add_photo_req = media_items.batchCreate(body=payload)
+      add_photo_resp = add_photo_req.execute()
+    except Exception as e:
+      #pdb.set_trace()
+      raise e
 
     #Process success and flag in DB
     success_list = []
     for ul_item in add_photo_resp['newMediaItemResults']:
-      if ul_item['mediaItem'] is not None:
-        photo = uploaded_photos[ul_item['uploadToken']]
+      photo = uploaded_photos[ul_item['uploadToken']]
+      if 'mediaItem' in ul_item and ul_item['mediaItem'] is not None:
         photo['g_id'] = ul_item['mediaItem']['id']
         success_list.append(photo)
+      else:
+        print(f"Failed:\n  {photo['path']} with \n  {ul_item['status']}")
+        pass
 
     return add_photo_resp, success_list
 
